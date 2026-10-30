@@ -77,6 +77,7 @@ p {
 }
 
 .card {
+  min-width: 0; /* stop wide content from stretching the card */
   padding: var(--space-lg);
   background-color: var(--color-surface);
   border-radius: var(--radius);
@@ -98,6 +99,8 @@ p {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
+  /* Let grid columns shrink below their content width (prevents overflow) */
+  min-width: 0;
 }
 
 .form-group label {
@@ -112,14 +115,29 @@ p {
 
 .form-group input,
 .form-group select {
+  display: block;
   width: 100%;
-  padding: 0.75rem;
+  min-width: 0;
+  height: 3rem; /* same height for every field */
+  padding: 0 0.75rem;
   font: inherit;
   color: var(--color-text);
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* iOS Safari gives date inputs a fixed native width that ignores width: 100%.
+   Removing the native styling lets the field fit the card like the others. */
+.form-group input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Keep the date text left-aligned like the other fields (iOS centres it) */
+.form-group input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
 }
 
 .form-group input:focus,
@@ -131,7 +149,8 @@ p {
 
 /* ---------- Buttons ---------- */
 .btn {
-  padding: 0.85rem 1.25rem;
+  height: 3rem;
+  padding: 0 1.25rem;
   font: inherit;
   font-weight: 600;
   border: none;
