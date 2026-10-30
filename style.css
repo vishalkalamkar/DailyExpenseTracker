@@ -141,6 +141,11 @@ p {
   -webkit-appearance: none;
   appearance: none;
   max-width: 100%;
+  /* iOS Safari places the date at the top of the field instead of centring it.
+     Padding fills the space above and below so exactly one line of text fits:
+     (48px height - 2px border - 24px line) / 2 = 11px */
+  padding-top: 0.6875rem;
+  padding-bottom: 0.6875rem;
 }
 
 /* iOS Safari: the date value sits in its own box, which is centred,
@@ -149,6 +154,7 @@ p {
 .form-group input[type="date"]::-webkit-date-and-time-value {
   min-height: 1.5em;
   margin: 0;
+  line-height: 1.5;
   text-align: left;
 }
 
