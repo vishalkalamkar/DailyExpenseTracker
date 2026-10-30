@@ -121,6 +121,8 @@ p {
   height: 3rem; /* same height for every field */
   padding: 0 0.75rem;
   font: inherit;
+  line-height: 1.5;
+  text-align: left;
   color: var(--color-text);
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -128,16 +130,39 @@ p {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* ---------- Date input ----------
+   Browsers draw date inputs differently. These rules only adjust
+   size and alignment; the native date picker still opens on tap/click
+   and the date format is left to the browser. */
+
 /* iOS Safari gives date inputs a fixed native width that ignores width: 100%.
    Removing the native styling lets the field fit the card like the others. */
 .form-group input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
+  max-width: 100%;
 }
 
-/* Keep the date text left-aligned like the other fields (iOS centres it) */
+/* iOS Safari: the date value sits in its own box, which is centred,
+   has a margin, and collapses when empty. Left-align it, remove the
+   margin and keep one line of height so the field never shrinks. */
 .form-group input[type="date"]::-webkit-date-and-time-value {
+  min-height: 1.5em;
+  margin: 0;
   text-align: left;
+}
+
+/* Chrome, Edge and desktop Safari: remove the small built-in padding
+   so the date text lines up with the text in the other fields. */
+.form-group input[type="date"]::-webkit-datetime-edit,
+.form-group input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+/* Chrome and Edge: the calendar icon on the right */
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+  margin: 0 0 0 var(--space-sm);
+  cursor: pointer;
 }
 
 .form-group input:focus,
