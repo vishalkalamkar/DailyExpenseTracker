@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Track your daily expenses quickly and easily.">
+  <title>Daily Expense Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Daily Expense Tracker</h1>
+    <p class="app-subtitle">Keep an eye on where your money goes.</p>
+  </header>
+
+  <main class="container">
+    <!-- Add Expense form -->
+    <section class="card" aria-labelledby="add-expense-title">
+      <h2 id="add-expense-title">Add Expense</h2>
+
+      <form id="expense-form" class="expense-form">
+        <div class="form-group">
+          <label for="amount">Amount</label>
+          <input
+            type="number"
+            id="amount"
+            name="amount"
+            placeholder="0.00"
+            min="0.01"
+            step="0.01"
+            inputmode="decimal"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" name="category" required>
+            <option value="" disabled selected>Select a category</option>
+            <option value="food">Food</option>
+            <option value="transport">Transport</option>
+            <option value="shopping">Shopping</option>
+            <option value="bills">Bills</option>
+            <option value="health">Health</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input type="date" id="date" name="date" required>
+        </div>
+
+        <div class="form-group">
+          <label for="note">Note <span class="optional">(optional)</span></label>
+          <input
+            type="text"
+            id="note"
+            name="note"
+            placeholder="e.g. Lunch with friends"
+            maxlength="100"
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Expense</button>
+      </form>
+    </section>
+
+    <!-- Recent Expenses list -->
+    <section class="card" aria-labelledby="recent-expenses-title">
+      <h2 id="recent-expenses-title">Recent Expenses</h2>
+
+      <ul id="expense-list" class="expense-list"></ul>
+
+      <div id="empty-state" class="empty-state">
+        <p class="empty-state-title">No expenses yet</p>
+        <p class="empty-state-text">Expenses you add will appear here.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>Daily Expense Tracker</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
