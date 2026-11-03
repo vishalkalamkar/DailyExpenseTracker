@@ -2,6 +2,7 @@
 // Daily Expense Tracker - App logic
 // Day 2: validate the form, keep expenses in memory and
 // show them in the Recent Expenses list.
+// Day 3: delete individual expenses.
 // Note: expenses are lost on page refresh until storage is added.
 // ==========================================================
 
@@ -14,10 +15,14 @@ const noteInput = document.getElementById("note");
 const formMessage = document.getElementById("form-message");
 const expenseList = document.getElementById("expense-list");
 const emptyState = document.getElementById("empty-state");
+const recentExpensesTitle = document.getElementById("recent-expenses-title");
 
 // ---------- App data ----------
 // All expenses added in this session (newest first)
-const expenses = [];
+let expenses = [];
+
+// Each expense gets a unique id so we can find it again (e.g. to delete it)
+let nextExpenseId = 1;
 
 // Display names for each category value used in the <select>
 const CATEGORY_LABELS = {
@@ -136,6 +141,13 @@ function validateForm(values) {
 
 // ---------- Rendering ----------
 
+// Trash-can icon used on Delete buttons (fixed SVG, no user text inside)
+const TRASH_ICON = `
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round" d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6" />
+  </svg>`;
+
 // Builds one <li> for an expense
 function createExpenseItem(expense) {
   const item = document.createElement("li");
@@ -166,8 +178,29 @@ function createExpenseItem(expense) {
   amount.className = "expense-amount";
   amount.textContent = rupeeFormatter.format(expense.amount);
 
-  item.append(details, amount);
+  // Amount and Delete button stay together on the right
+  const actions = document.createElement("div");
+  actions.className = "expense-actions";
+  actions.append(amount, createDeleteButton(expense));
+
+  item.append(details, actions);
   return item;
+}
+
+// Builds the trash-can Delete button for an expense
+function createDeleteButton(expense) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn-delete";
+  // Remember which expense this button belongs to
+  button.dataset.id = expense.id;
+  // The button only shows an icon, so give screen readers a clear label
+  button.setAttribute(
+    "aria-label",
+    `Delete ${CATEGORY_LABELS[expense.category]} expense of ${rupeeFormatter.format(expense.amount)}`
+  );
+  button.innerHTML = TRASH_ICON;
+  return button;
 }
 
 // Redraws the Recent Expenses list from the expenses array
@@ -207,6 +240,10 @@ expenseForm.addEventListener("submit", function (event) {
     return;
   }
 
+  // Give the expense its unique id
+  values.id = nextExpenseId;
+  nextExpenseId++;
+
   // Newest expense goes to the top of the list
   expenses.unshift(values);
   renderExpenses();
@@ -222,6 +259,54 @@ expenseForm.addEventListener("submit", function (event) {
   input.addEventListener("input", function () {
     clearError(input);
   });
+});
+
+// ---------- Deleting ----------
+
+// Removes one expense (after the user confirms) and redraws the list
+function deleteExpense(id) {
+  const expense = expenses.find(function (item) {
+    return item.id === id;
+  });
+  if (!expense) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Delete this ${CATEGORY_LABELS[expense.category]} expense of ${rupeeFormatter.format(expense.amount)}?`
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  // Remember the position so keyboard focus can stay nearby
+  const index = expenses.indexOf(expense);
+
+  // Keep every expense except the one being deleted
+  expenses = expenses.filter(function (item) {
+    return item.id !== id;
+  });
+  renderExpenses();
+  showSuccessMessage("Expense deleted.");
+
+  // Move focus to the next Delete button (or the heading if the list is empty)
+  // so keyboard users are not sent back to the top of the page
+  const buttons = expenseList.querySelectorAll(".btn-delete");
+  const nextButton = buttons[index] || buttons[index - 1];
+  if (nextButton) {
+    nextButton.focus();
+  } else {
+    recentExpensesTitle.focus();
+  }
+}
+
+// One click listener on the whole list handles every Delete button,
+// including buttons for expenses added later
+expenseList.addEventListener("click", function (event) {
+  const button = event.target.closest(".btn-delete");
+  if (button) {
+    deleteExpense(Number(button.dataset.id));
+  }
 });
 
 // ---------- Start ----------
