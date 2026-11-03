@@ -14,6 +14,11 @@
   --color-primary: #4f46e5;
   --color-primary-hover: #4338ca;
   --color-focus: rgba(79, 70, 229, 0.25);
+  --color-error: #dc2626;
+  --color-error-focus: rgba(220, 38, 38, 0.2);
+  --color-success: #15803d;
+  --color-success-bg: #f0fdf4;
+  --color-success-border: #bbf7d0;
 
   --radius: 12px;
   --shadow: 0 4px 16px rgba(17, 24, 39, 0.06);
@@ -141,20 +146,24 @@ p {
   -webkit-appearance: none;
   appearance: none;
   max-width: 100%;
-  /* iOS Safari places the date at the top of the field instead of centring it.
-     Padding fills the space above and below so exactly one line of text fits:
-     (48px height - 2px border - 24px line) / 2 = 11px */
+  /* iOS Safari does not centre the date inside a fixed-height field.
+     Instead of a fixed height, equal padding above and below the text
+     sets the height, so the date always sits in the middle:
+     11px + 24px line + 11px + 2px border = 48px, same as other fields */
+  height: auto;
+  min-height: 3rem;
   padding-top: 0.6875rem;
   padding-bottom: 0.6875rem;
+  line-height: 1.5rem;
 }
 
 /* iOS Safari: the date value sits in its own box, which is centred,
    has a margin, and collapses when empty. Left-align it, remove the
-   margin and keep one line of height so the field never shrinks. */
+   margin and give it exactly one line of height. */
 .form-group input[type="date"]::-webkit-date-and-time-value {
-  min-height: 1.5em;
+  min-height: 1.5rem;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.5rem;
   text-align: left;
 }
 
@@ -176,6 +185,41 @@ p {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-focus);
+}
+
+/* ---------- Validation messages ---------- */
+
+/* Red border on fields that failed validation */
+.form-group input[aria-invalid="true"],
+.form-group select[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.form-group input[aria-invalid="true"]:focus,
+.form-group select[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px var(--color-error-focus);
+}
+
+.error-message {
+  font-size: 0.85rem;
+  color: var(--color-error);
+}
+
+/* Take up no space when there is no error */
+.error-message:empty {
+  display: none;
+}
+
+/* Green message shown after an expense is added */
+.form-message {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-success);
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  border-radius: 8px;
 }
 
 /* ---------- Buttons ---------- */
@@ -210,6 +254,49 @@ p {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.expense-item:first-child {
+  padding-top: 0;
+}
+
+.expense-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.expense-details {
+  min-width: 0; /* lets long notes wrap instead of pushing the amount out */
+}
+
+.expense-category {
+  font-weight: 600;
+}
+
+.expense-date {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.expense-note {
+  margin-top: var(--space-xs);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere; /* break very long words */
+}
+
+.expense-amount {
+  flex-shrink: 0;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .empty-state {
@@ -248,7 +335,8 @@ p {
     grid-template-columns: 1fr 1fr;
   }
 
-  .btn-primary {
+  .btn-primary,
+  .form-message {
     grid-column: 1 / -1;
   }
 }
