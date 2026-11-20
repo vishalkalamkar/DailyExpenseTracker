@@ -7,11 +7,11 @@
 // in the browser. Data is protected by Firestore security rules instead.
 // ==========================================================
 
-export const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_PROJECT_ID.firebasestorage.app",
-  messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID",
+const firebaseConfig = {
+  apiKey: "AIzaSyCap3dxoGHomeoGfY90-p-dpYlr360YHC0",
+  authDomain: "daily-expense-tracker-64258.firebaseapp.com",
+  projectId: "daily-expense-tracker-64258",
+  storageBucket: "daily-expense-tracker-64258.firebasestorage.app",
+  messagingSenderId: "989576363382",
+  appId: "1:989576363382:web:b982a7a58b58a5cec60e57"
 };
