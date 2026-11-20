@@ -5,7 +5,10 @@
 // Day 3: delete individual expenses.
 // Day 4: save expenses in the browser (LocalStorage) so they
 // survive a refresh or reopening the page.
+// Day 5: load Firebase (setup only; sign-in and cloud saving come later).
 // ==========================================================
+
+import { firebaseConfig } from "./firebase-config.js";
 
 // ---------- Page elements ----------
 const expenseForm = document.getElementById("expense-form");
@@ -49,6 +52,12 @@ let messageTimer = null;
 
 // LocalStorage key where expenses are saved
 const STORAGE_KEY = "dailyExpenses";
+
+// Firebase SDK files, loaded from Google's CDN (exact version, no install needed)
+const FIREBASE_SDK_URL = "https://www.gstatic.com/firebasejs/13.2.0";
+
+// Set once Firebase has loaded; stays null in guest-only mode
+let firebaseApp = null;
 
 // ---------- Helpers ----------
 
@@ -372,6 +381,32 @@ expenseList.addEventListener("click", function (event) {
   }
 });
 
+// ---------- Firebase ----------
+
+// True once firebase-config.js has been filled in with real project values
+function isFirebaseConfigured() {
+  return Object.values(firebaseConfig).every(function (value) {
+    return typeof value === "string" && value !== "" && !value.includes("REPLACE_WITH");
+  });
+}
+
+// Loads Firebase in the background. It is loaded with import() inside
+// try/catch so that if Google's CDN can't be reached (offline, blocked),
+// the rest of the app still works in guest mode with LocalStorage.
+async function initFirebase() {
+  if (!isFirebaseConfigured()) {
+    console.warn("Firebase is not configured yet (see firebase-config.js). Using guest mode.");
+    return;
+  }
+
+  try {
+    const { initializeApp } = await import(`${FIREBASE_SDK_URL}/firebase-app.js`);
+    firebaseApp = initializeApp(firebaseConfig);
+  } catch (error) {
+    console.warn("Firebase could not be loaded. Using guest mode.", error);
+  }
+}
+
 // ---------- Start ----------
 expenses = loadExpenses();
 
@@ -385,3 +420,6 @@ expenses.forEach(function (expense) {
 
 dateInput.value = getTodayDate();
 renderExpenses();
+
+// Started after the list is drawn, so guest mode never waits for Firebase
+initFirebase();
