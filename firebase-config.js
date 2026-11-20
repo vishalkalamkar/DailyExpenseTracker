@@ -7,7 +7,7 @@
 // in the browser. Data is protected by Firestore security rules instead.
 // ==========================================================
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyCap3dxoGHomeoGfY90-p-dpYlr360YHC0",
   authDomain: "daily-expense-tracker-64258.firebaseapp.com",
   projectId: "daily-expense-tracker-64258",
