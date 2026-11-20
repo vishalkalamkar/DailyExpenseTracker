@@ -3,7 +3,8 @@
 // Day 2: validate the form, keep expenses in memory and
 // show them in the Recent Expenses list.
 // Day 3: delete individual expenses.
-// Note: expenses are lost on page refresh until storage is added.
+// Day 4: save expenses in the browser (LocalStorage) so they
+// survive a refresh or reopening the page.
 // ==========================================================
 
 // ---------- Page elements ----------
@@ -18,7 +19,7 @@ const emptyState = document.getElementById("empty-state");
 const recentExpensesTitle = document.getElementById("recent-expenses-title");
 
 // ---------- App data ----------
-// All expenses added in this session (newest first)
+// All expenses (newest first). Loaded from LocalStorage at start.
 let expenses = [];
 
 // Each expense gets a unique id so we can find it again (e.g. to delete it)
@@ -45,6 +46,9 @@ const rupeeFormatter = new Intl.NumberFormat("en-IN", {
 // How long the success message stays visible (milliseconds)
 const MESSAGE_DURATION = 3000;
 let messageTimer = null;
+
+// LocalStorage key where expenses are saved
+const STORAGE_KEY = "dailyExpenses";
 
 // ---------- Helpers ----------
 
@@ -96,6 +100,63 @@ function hideSuccessMessage() {
   clearTimeout(messageTimer);
   formMessage.hidden = true;
   formMessage.textContent = "";
+}
+
+// ---------- Saving & loading (LocalStorage) ----------
+
+// Checks that one saved expense has everything the app needs,
+// so broken or old data can never crash the page
+function isValidSavedExpense(expense) {
+  return (
+    expense !== null &&
+    typeof expense === "object" &&
+    Number.isInteger(expense.id) &&
+    expense.id > 0 &&
+    typeof expense.amount === "number" &&
+    Number.isFinite(expense.amount) &&
+    expense.amount > 0 &&
+    CATEGORY_LABELS.hasOwnProperty(expense.category) &&
+    typeof expense.date === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(expense.date) &&
+    typeof expense.note === "string"
+  );
+}
+
+// Reads saved expenses. Returns an empty list if there is nothing saved,
+// the data is not valid JSON, or the browser blocks storage.
+function loadExpenses() {
+  let saved;
+  try {
+    saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  } catch (error) {
+    console.warn("Could not read saved expenses:", error);
+    return [];
+  }
+
+  // Nothing saved yet (getItem returns null) or not a list
+  if (!Array.isArray(saved)) {
+    return [];
+  }
+
+  // Keep only valid expenses, and skip any repeated ids
+  const seenIds = new Set();
+  return saved.filter(function (expense) {
+    if (!isValidSavedExpense(expense) || seenIds.has(expense.id)) {
+      return false;
+    }
+    seenIds.add(expense.id);
+    return true;
+  });
+}
+
+// Saves the current expenses. The app keeps working (without saving)
+// if storage is full or blocked, e.g. in some private browsing modes.
+function saveExpenses() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+  } catch (error) {
+    console.warn("Could not save expenses:", error);
+  }
 }
 
 // ---------- Validation ----------
@@ -246,6 +307,7 @@ expenseForm.addEventListener("submit", function (event) {
 
   // Newest expense goes to the top of the list
   expenses.unshift(values);
+  saveExpenses();
   renderExpenses();
 
   resetForm();
@@ -286,6 +348,7 @@ function deleteExpense(id) {
   expenses = expenses.filter(function (item) {
     return item.id !== id;
   });
+  saveExpenses();
   renderExpenses();
   showSuccessMessage("Expense deleted.");
 
@@ -310,5 +373,15 @@ expenseList.addEventListener("click", function (event) {
 });
 
 // ---------- Start ----------
+expenses = loadExpenses();
+
+// Continue numbering after the highest saved id, so new expenses
+// never reuse an id (which would make Delete remove the wrong one)
+expenses.forEach(function (expense) {
+  if (expense.id >= nextExpenseId) {
+    nextExpenseId = expense.id + 1;
+  }
+});
+
 dateInput.value = getTodayDate();
 renderExpenses();
